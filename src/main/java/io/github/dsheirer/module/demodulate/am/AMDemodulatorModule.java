@@ -1,6 +1,6 @@
 /*
  * *****************************************************************************
- * Copyright (C) 2014-2022 Dennis Sheirer
+ * Copyright (C) 2014-2023 Dennis Sheirer
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
  */
 package io.github.dsheirer.module.demodulate.am;
 
-import io.github.dsheirer.dsp.am.AMDemodulator;
+import io.github.dsheirer.dsp.am.ScalarAMDemodulator;
 import io.github.dsheirer.dsp.filter.FilterFactory;
 import io.github.dsheirer.dsp.filter.design.FilterDesignException;
 import io.github.dsheirer.dsp.filter.fir.FIRFilterSpecification;
@@ -50,7 +50,7 @@ public class AMDemodulatorModule extends Module
     private IRealFilter mIBasebandFilter;
     private IRealFilter mQBasebandFilter;
 
-    private AMDemodulator mDemodulator;
+    private ScalarAMDemodulator mDemodulator;
     private IRealFilter mLowPassFilter;
     private AutomaticGainControl mAGC = new AutomaticGainControl();
     private double mChannelBandwidth;
@@ -70,7 +70,7 @@ public class AMDemodulatorModule extends Module
         mChannelBandwidth = channelBandwidth;
         mOutputSampleRate = outputSampleRate;
 
-        mDemodulator = new AMDemodulator(500.0f);
+        mDemodulator = new ScalarAMDemodulator(500.0f);
 
         float[] lowPassCoefficients = null;
 

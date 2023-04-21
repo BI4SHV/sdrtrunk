@@ -1,6 +1,6 @@
 /*
  * *****************************************************************************
- * Copyright (C) 2014-2022 Dennis Sheirer
+ * Copyright (C) 2014-2023 Dennis Sheirer
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,21 +18,28 @@
  */
 package io.github.dsheirer.dsp.am;
 
+import io.github.dsheirer.dsp.magnitude.IMagnitudeCalculator;
+import io.github.dsheirer.dsp.magnitude.MagnitudeFactory;
+import io.github.dsheirer.vector.VectorUtilities;
+import jdk.incubator.vector.FloatVector;
+import jdk.incubator.vector.VectorSpecies;
 import org.apache.commons.math3.util.FastMath;
 
 /**
  * Performs AM demodulation on baseband I/Q samples to produce demodulated float output.
  */
-public class AMDemodulator implements IAmDemodulator
+public class VectorAMDemodulator512 implements IAmDemodulator
 {
+    private static final VectorSpecies<Float> VECTOR_SPECIES = FloatVector.SPECIES_512;
     private float mGain;
+    private IMagnitudeCalculator mMagnitudeCalculator = MagnitudeFactory.getMagnitudeCalculator();
 
     /**
      * Constructs this demodulator where the specified gain is applied to demodulated output samples.
      *
      * @param gain to apply to demodulated output samples.
      */
-    public AMDemodulator(float gain)
+    public VectorAMDemodulator512(float gain)
     {
         mGain = gain;
     }
@@ -59,11 +66,16 @@ public class AMDemodulator implements IAmDemodulator
 
     @Override public float[] demodulate(float[] i, float[] q)
     {
+        VectorUtilities.checkComplexArrayLength(i, q, VECTOR_SPECIES);
+        FloatVector gain = FloatVector.broadcast(VECTOR_SPECIES, mGain);
         float[] demodulated = new float[i.length];
+        float[] magnitude = mMagnitudeCalculator.getMagnitude(i, q);
 
-        for(int x = 0; x < i.length; x++)
+        FloatVector vector;
+        for(int x = 0; x < i.length; x += VECTOR_SPECIES.length())
         {
-            demodulated[x] = (float)FastMath.sqrt((i[x] * i[x]) + (q[x] * q[x])) * mGain;
+            vector = FloatVector.fromArray(VECTOR_SPECIES, magnitude, x);
+            vector.sqrt().mul(gain).intoArray(demodulated, x);
         }
 
         return demodulated;

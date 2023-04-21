@@ -17,7 +17,7 @@
  * ****************************************************************************
  */
 
-package io.github.dsheirer.dsp.fm;
+package io.github.dsheirer.dsp.magnitude;
 
 import io.github.dsheirer.vector.calibrate.CalibrationManager;
 import io.github.dsheirer.vector.calibrate.CalibrationType;
@@ -26,44 +26,34 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Factory for creating FM demodulators
+ * Factory for creating magnitude implementations
  */
-public class FmDemodulatorFactory
+public class MagnitudeFactory
 {
-    private static final Logger mLog = LoggerFactory.getLogger(FmDemodulatorFactory.class);
+    private static final Logger mLog = LoggerFactory.getLogger(MagnitudeFactory.class);
 
     /**
-     * Creates the optimal FM demodulator using calibration data to select the optimal
+     * Creates a magnitude implementation using calibration data to select the optimal
      * implementation from scalar and vector options.
      * @return demodulator instance
      */
-    public static IFmDemodulator getFmDemodulator()
+    public static IMagnitudeCalculator getMagnitudeCalculator()
     {
-        Implementation implementation = CalibrationManager.getInstance().getImplementation(CalibrationType.FM_DEMODULATOR);
+        Implementation implementation = CalibrationManager.getInstance().getImplementation(CalibrationType.MAGNITUDE);
 
         switch(implementation)
         {
             case VECTOR_SIMD_64:
-                return new VectorFMDemodulator64();
+                return new VectorMagnitudeCalculator64();
             case VECTOR_SIMD_128:
-                return new VectorFMDemodulator128();
+                return new VectorMagnitudeCalculator128();
             case VECTOR_SIMD_256:
-                return new VectorFMDemodulator256();
+                return new VectorMagnitudeCalculator256();
             case VECTOR_SIMD_512:
-                return new VectorFMDemodulator512();
+                return new VectorMagnitudeCalculator512();
             case SCALAR:
             default:
-                return new ScalarFMDemodulator();
+                return new ScalarMagnitudeCalculator();
         }
-    }
-
-    /**
-     * Creates the optimal Squelching FM demodulator using calibration data to select the optimal
-     * implementation from scalar and vector options.
-     * @return demodulator instance
-     */
-    public static ISquelchingFmDemodulator getSquelchingFmDemodulator(float alpha, float threshold, int ramp)
-    {
-        return new SquelchingFMDemodulator(alpha, threshold, ramp);
     }
 }

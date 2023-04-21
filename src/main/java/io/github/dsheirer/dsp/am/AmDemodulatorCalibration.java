@@ -17,14 +17,8 @@
  * ****************************************************************************
  */
 
-package io.github.dsheirer.vector.calibrate.demodulator;
+package io.github.dsheirer.dsp.am;
 
-import io.github.dsheirer.dsp.fm.IFmDemodulator;
-import io.github.dsheirer.dsp.fm.ScalarFMDemodulator;
-import io.github.dsheirer.dsp.fm.VectorFMDemodulator128;
-import io.github.dsheirer.dsp.fm.VectorFMDemodulator256;
-import io.github.dsheirer.dsp.fm.VectorFMDemodulator512;
-import io.github.dsheirer.dsp.fm.VectorFMDemodulator64;
 import io.github.dsheirer.vector.calibrate.Calibration;
 import io.github.dsheirer.vector.calibrate.CalibrationException;
 import io.github.dsheirer.vector.calibrate.CalibrationType;
@@ -32,26 +26,27 @@ import io.github.dsheirer.vector.calibrate.Implementation;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 
 /**
- * Calibrates FM demodulator options
+ * Calibrates AM demodulator options
  */
-public class FmDemodulatorCalibration extends Calibration
+public class AmDemodulatorCalibration extends Calibration
 {
     private static final int BUFFER_SIZE = 2048;
     private static final int ITERATION_DURATION_MS = 1000;
     private static final int WARMUP_ITERATIONS = 5;
     private static final int TEST_ITERATIONS = 5;
-    private IFmDemodulator mScalarDemodulator = new ScalarFMDemodulator();
-    private IFmDemodulator mVectorDemodulator64 = new VectorFMDemodulator64();
-    private IFmDemodulator mVectorDemodulator128 = new VectorFMDemodulator128();
-    private IFmDemodulator mVectorDemodulator256 = new VectorFMDemodulator256();
-    private IFmDemodulator mVectorDemodulator512 = new VectorFMDemodulator512();
+    private IAmDemodulator mScalarDemodulator = new ScalarAMDemodulator(500.0f);
+    private IAmDemodulator mVectorDemodulator64 = new VectorAMDemodulator64(500.0f);
+    private IAmDemodulator mVectorDemodulator128 = new VectorAMDemodulator128(500.0f);
+    private IAmDemodulator mVectorAMDemodulator256 = new VectorAMDemodulator256(500.0f);
+    private IAmDemodulator mVectorAMDemodulator512 = new VectorAMDemodulator512(500.0f);
+
 
     /**
      * Constructs an instance
      */
-    public FmDemodulatorCalibration()
+    public AmDemodulatorCalibration()
     {
-        super(CalibrationType.FM_DEMODULATOR);
+        super(CalibrationType.AM_DEMODULATOR);
     }
 
     @Override public void calibrate() throws CalibrationException
@@ -67,47 +62,47 @@ public class FmDemodulatorCalibration extends Calibration
             scalarMean.increment(score);
         }
 
-        mLog.info("FM DEMODULATOR WARMUP - SCALAR: " + DECIMAL_FORMAT.format(scalarMean.getResult()));
+        mLog.info("AM DEMODULATOR WARMUP - SCALAR: " + DECIMAL_FORMAT.format(scalarMean.getResult()));
 
-        Mean vectorMean64 = new Mean();
+        Mean vector64Mean = new Mean();
 
         for(int x = 0; x < WARMUP_ITERATIONS; x++)
         {
             long score = testVector64(i, q);
-            vectorMean64.increment(score);
+            vector64Mean.increment(score);
         }
 
-        mLog.info("FM DEMODULATOR WARMUP - VECTOR 64: " + DECIMAL_FORMAT.format(vectorMean64.getResult()));
+        mLog.info("AM DEMODULATOR WARMUP - VECTOR 64: " + DECIMAL_FORMAT.format(vector64Mean.getResult()));
 
-        Mean vectorMean128 = new Mean();
+        Mean vector128Mean = new Mean();
 
         for(int x = 0; x < WARMUP_ITERATIONS; x++)
         {
             long score = testVector128(i, q);
-            vectorMean128.increment(score);
+            vector128Mean.increment(score);
         }
 
-        mLog.info("FM DEMODULATOR WARMUP - VECTOR 128: " + DECIMAL_FORMAT.format(vectorMean128.getResult()));
+        mLog.info("AM DEMODULATOR WARMUP - VECTOR 128: " + DECIMAL_FORMAT.format(vector128Mean.getResult()));
 
-        Mean vectorMean256 = new Mean();
+        Mean vector256Mean = new Mean();
 
         for(int x = 0; x < WARMUP_ITERATIONS; x++)
         {
             long score = testVector256(i, q);
-            vectorMean256.increment(score);
+            vector256Mean.increment(score);
         }
 
-        mLog.info("FM DEMODULATOR WARMUP - VECTOR 256: " + DECIMAL_FORMAT.format(vectorMean256.getResult()));
+        mLog.info("AM DEMODULATOR WARMUP - VECTOR 256: " + DECIMAL_FORMAT.format(vector256Mean.getResult()));
 
-        Mean vectorMean512 = new Mean();
+        Mean vector512Mean = new Mean();
 
         for(int x = 0; x < WARMUP_ITERATIONS; x++)
         {
             long score = testVector512(i, q);
-            vectorMean512.increment(score);
+            vector512Mean.increment(score);
         }
 
-        mLog.info("FM DEMODULATOR WARMUP - VECTOR 512: " + DECIMAL_FORMAT.format(vectorMean512.getResult()));
+        mLog.info("AM DEMODULATOR WARMUP - VECTOR 512: " + DECIMAL_FORMAT.format(vector512Mean.getResult()));
 
         //Start tests
         scalarMean.clear();
@@ -118,77 +113,77 @@ public class FmDemodulatorCalibration extends Calibration
             scalarMean.increment(score);
         }
 
-        mLog.info("FM DEMODULATOR - SCALAR: " + DECIMAL_FORMAT.format(scalarMean.getResult()));
+        mLog.info("AM DEMODULATOR - SCALAR: " + DECIMAL_FORMAT.format(scalarMean.getResult()));
 
-        vectorMean64.clear();
+        vector64Mean.clear();
 
         for(int x = 0; x < TEST_ITERATIONS; x++)
         {
             long score = testVector64(i, q);
-            vectorMean64.increment(score);
+            vector64Mean.increment(score);
         }
 
-        mLog.info("FM DEMODULATOR - VECTOR 64: " + DECIMAL_FORMAT.format(vectorMean64.getResult()));
+        mLog.info("AM DEMODULATOR - VECTOR 64: " + DECIMAL_FORMAT.format(vector64Mean.getResult()));
 
-        vectorMean128.clear();
+        vector128Mean.clear();
 
         for(int x = 0; x < TEST_ITERATIONS; x++)
         {
             long score = testVector128(i, q);
-            vectorMean128.increment(score);
+            vector128Mean.increment(score);
         }
 
-        mLog.info("FM DEMODULATOR - VECTOR 128: " + DECIMAL_FORMAT.format(vectorMean128.getResult()));
+        mLog.info("AM DEMODULATOR - VECTOR 128: " + DECIMAL_FORMAT.format(vector128Mean.getResult()));
 
-        vectorMean256.clear();
+        vector256Mean.clear();
 
         for(int x = 0; x < TEST_ITERATIONS; x++)
         {
             long score = testVector256(i, q);
-            vectorMean256.increment(score);
+            vector256Mean.increment(score);
         }
 
-        mLog.info("FM DEMODULATOR - VECTOR 256: " + DECIMAL_FORMAT.format(vectorMean256.getResult()));
+        mLog.info("AM DEMODULATOR - VECTOR 256: " + DECIMAL_FORMAT.format(vector256Mean.getResult()));
 
-        vectorMean512.clear();
+        vector512Mean.clear();
 
         for(int x = 0; x < TEST_ITERATIONS; x++)
         {
             long score = testVector512(i, q);
-            vectorMean512.increment(score);
+            vector512Mean.increment(score);
         }
 
-        mLog.info("FM DEMODULATOR - VECTOR 512: " + DECIMAL_FORMAT.format(vectorMean512.getResult()));
+        mLog.info("AM DEMODULATOR - VECTOR 512: " + DECIMAL_FORMAT.format(vector512Mean.getResult()));
 
-        Implementation best = Implementation.SCALAR;
-        double bestScore = scalarMean.getResult();
+        Implementation optimal = Implementation.SCALAR;
+        double optimalResult = scalarMean.getResult();
 
-        if(vectorMean64.getResult() > bestScore)
+        if(vector64Mean.getResult() > optimalResult)
         {
-            bestScore = vectorMean64.getResult();
-            best = Implementation.VECTOR_SIMD_64;
+            optimal = Implementation.VECTOR_SIMD_64;
+            optimalResult = vector64Mean.getResult();
         }
 
-        if(vectorMean128.getResult() > bestScore)
+        if(vector128Mean.getResult() > optimalResult)
         {
-            bestScore = vectorMean128.getResult();
-            best = Implementation.VECTOR_SIMD_128;
+            optimal = Implementation.VECTOR_SIMD_128;
+            optimalResult = vector128Mean.getResult();
         }
 
-        if(vectorMean256.getResult() > bestScore)
+        if(vector256Mean.getResult() > optimalResult)
         {
-            bestScore = vectorMean256.getResult();
-            best = Implementation.VECTOR_SIMD_256;
+            optimal = Implementation.VECTOR_SIMD_256;
+            optimalResult = vector256Mean.getResult();
         }
 
-        if(vectorMean512.getResult() > bestScore)
+        if(vector512Mean.getResult() > optimalResult)
         {
-            best = Implementation.VECTOR_SIMD_512;
+            optimal = Implementation.VECTOR_SIMD_512;
         }
 
-        setImplementation(best);
+        setImplementation(optimal);
 
-        mLog.info("FM DEMODULATOR - SET OPTIMAL IMPLEMENTATION TO:" + getImplementation());
+        mLog.info("AM DEMODULATOR - SET OPTIMAL IMPLEMENTATION TO:" + getImplementation());
     }
 
     private long testScalar(float[] i, float[] q)
@@ -248,7 +243,7 @@ public class FmDemodulatorCalibration extends Calibration
 
         while((System.currentTimeMillis() - start) < ITERATION_DURATION_MS)
         {
-            float[] demodulated = mVectorDemodulator256.demodulate(i, q);
+            float[] demodulated = mVectorAMDemodulator256.demodulate(i, q);
             accumulator += demodulated[1];
             count++;
         }
@@ -264,7 +259,7 @@ public class FmDemodulatorCalibration extends Calibration
 
         while((System.currentTimeMillis() - start) < ITERATION_DURATION_MS)
         {
-            float[] demodulated = mVectorDemodulator512.demodulate(i, q);
+            float[] demodulated = mVectorAMDemodulator512.demodulate(i, q);
             accumulator += demodulated[1];
             count++;
         }
@@ -274,7 +269,7 @@ public class FmDemodulatorCalibration extends Calibration
 
     public static void main(String[] args)
     {
-        FmDemodulatorCalibration calibration = new FmDemodulatorCalibration();
+        AmDemodulatorCalibration calibration = new AmDemodulatorCalibration();
 
         try
         {

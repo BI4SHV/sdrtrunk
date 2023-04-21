@@ -1,6 +1,6 @@
 /*
  * *****************************************************************************
- * Copyright (C) 2014-2022 Dennis Sheirer
+ * Copyright (C) 2014-2023 Dennis Sheirer
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,11 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  * ****************************************************************************
  */
+
 package io.github.dsheirer.dsp.fm;
 
+import io.github.dsheirer.dsp.magnitude.IMagnitudeCalculator;
+import io.github.dsheirer.dsp.magnitude.MagnitudeFactory;
 import io.github.dsheirer.dsp.squelch.PowerSquelch;
 import io.github.dsheirer.sample.Listener;
 import io.github.dsheirer.source.SourceEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * FM Demodulator for demodulating complex samples and producing demodulated floating point samples.
@@ -28,17 +33,28 @@ import io.github.dsheirer.source.SourceEvent;
  * Implements listener of source events to process runtime squelch threshold change request events
  * which are forwarded to the power squelch control.
  */
-public class ScalarSquelchingFMDemodulator extends ScalarFMDemodulator implements ISquelchingFmDemodulator, Listener<SourceEvent>
+public class SquelchingFMDemodulator implements ISquelchingFmDemodulator, Listener<SourceEvent>
 {
+    private static final Logger mLog = LoggerFactory.getLogger(SquelchingFMDemodulator.class);
+    private static final float TWO = 2.0f;
+    private static final float ZERO = 0.0f;
     private PowerSquelch mPowerSquelch;
     private boolean mSquelchChanged = false;
+    private IMagnitudeCalculator mMagnitude = MagnitudeFactory.getMagnitudeCalculator();
+    private IFmDemodulator mFmDemodulator = FmDemodulatorFactory.getFmDemodulator();
 
     /**
      * Creates an FM demodulator instance with a default gain of 1.0.
      */
-    public ScalarSquelchingFMDemodulator(float alpha, float threshold, int ramp)
+    public SquelchingFMDemodulator(float alpha, float threshold, int ramp)
     {
         mPowerSquelch = new PowerSquelch(alpha, threshold, ramp);
+        mLog.info("Magnitude: " + mMagnitude.getClass());
+        mLog.info("FM Demod:" + mFmDemodulator.getClass());
+    }
+
+    public void reset()
+    {
     }
 
     /**
@@ -47,6 +63,38 @@ public class ScalarSquelchingFMDemodulator extends ScalarFMDemodulator implement
     public void setSourceEventListener(Listener<SourceEvent> listener)
     {
         mPowerSquelch.setSourceEventListener(listener);
+    }
+
+    /**
+     * Demodulates the complex (I/Q) sample arrays
+     * @param i inphase samples
+     * @param q quadrature samples
+     * @return demodulated real samples
+     */
+    @Override
+    public float[] demodulate(float[] i, float[] q)
+    {
+        setSquelchChanged(false);
+
+        float[] demodulated = mFmDemodulator.demodulate(i, q);
+        float[] magnitude = mMagnitude.getMagnitude(i, q);
+
+        for(int x = 0; x < i.length; x++)
+        {
+            mPowerSquelch.process(magnitude[x]);
+
+            if(!(mPowerSquelch.isUnmuted() || mPowerSquelch.isDecay()))
+            {
+                demodulated[x] = ZERO;
+            }
+
+            if(mPowerSquelch.isSquelchChanged())
+            {
+                setSquelchChanged(true);
+            }
+        }
+
+        return demodulated;
     }
 
     /**

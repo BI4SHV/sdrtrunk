@@ -29,30 +29,24 @@ import org.slf4j.LoggerFactory;
 /**
  * FM demodulator that uses JDK 17+ SIMD vector intrinsics
  */
-public abstract class VectorFMDemodulator implements IFmDemodulator
+public class VectorFMDemodulator512 implements IFmDemodulator
 {
-    private static final Logger mLog = LoggerFactory.getLogger(VectorFMDemodulator.class);
+    private static final Logger mLog = LoggerFactory.getLogger(VectorFMDemodulator512.class);
     protected static final float ZERO = 0.0f;
     private static final int BUFFER_OVERLAP = 1;
+    private static final VectorSpecies<Float> VECTOR_SPECIES = FloatVector.SPECIES_512;
 
     //Initialize buffers to be non-null and resize once the first buffer arrives
     private float[] mIBuffer = new float[1];
     private float[] mQBuffer = new float[1];
 
-    public VectorFMDemodulator()
+    public VectorFMDemodulator512()
     {
     }
 
-    /**
-     * Vector species as specified by the implementing sub-class.
-     */
-    protected abstract VectorSpecies<Float> getVectorSpecies();
-
     @Override public float[] demodulate(float[] i, float[] q)
     {
-//        VectorSpecies<Float> species= getVectorSpecies();
-
-        VectorUtilities.checkComplexArrayLength(i, q, getVectorSpecies());
+        VectorUtilities.checkComplexArrayLength(i, q, VECTOR_SPECIES);
 
         if(mIBuffer.length != (i.length + BUFFER_OVERLAP))
         {
@@ -72,12 +66,12 @@ public abstract class VectorFMDemodulator implements IFmDemodulator
 
         FloatVector currentI, currentQ, previousI, previousQ, demod, demodI, demodQ;
 
-        for(int bufferPointer = 0; bufferPointer < mIBuffer.length - 1; bufferPointer += getVectorSpecies().length())
+        for(int bufferPointer = 0; bufferPointer < mIBuffer.length - 1; bufferPointer += VECTOR_SPECIES.length())
         {
-            previousI = FloatVector.fromArray(getVectorSpecies(), mIBuffer, bufferPointer);
-            previousQ = FloatVector.fromArray(getVectorSpecies(), mQBuffer, bufferPointer);
-            currentI = FloatVector.fromArray(getVectorSpecies(), mIBuffer, bufferPointer + 1);
-            currentQ = FloatVector.fromArray(getVectorSpecies(), mQBuffer, bufferPointer + 1);
+            previousI = FloatVector.fromArray(VECTOR_SPECIES, mIBuffer, bufferPointer);
+            previousQ = FloatVector.fromArray(VECTOR_SPECIES, mQBuffer, bufferPointer);
+            currentI = FloatVector.fromArray(VECTOR_SPECIES, mIBuffer, bufferPointer + 1);
+            currentQ = FloatVector.fromArray(VECTOR_SPECIES, mQBuffer, bufferPointer + 1);
 
             demodI = currentI.mul(previousI).sub(currentQ.mul(previousQ.neg()));
             demodQ = currentQ.mul(previousI).add(currentI.mul(previousQ.neg()));

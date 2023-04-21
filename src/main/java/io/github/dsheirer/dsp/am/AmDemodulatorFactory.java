@@ -17,7 +17,7 @@
  * ****************************************************************************
  */
 
-package io.github.dsheirer.dsp.fm;
+package io.github.dsheirer.dsp.am;
 
 import io.github.dsheirer.vector.calibrate.CalibrationManager;
 import io.github.dsheirer.vector.calibrate.CalibrationType;
@@ -26,44 +26,36 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Factory for creating FM demodulators
+ * Factory for creating AM demodulators
  */
-public class FmDemodulatorFactory
+public class AmDemodulatorFactory
 {
-    private static final Logger mLog = LoggerFactory.getLogger(FmDemodulatorFactory.class);
+    private static final Logger mLog = LoggerFactory.getLogger(AmDemodulatorFactory.class);
 
     /**
-     * Creates the optimal FM demodulator using calibration data to select the optimal
+     * Creates the optimal AM demodulator using calibration data to select the optimal
      * implementation from scalar and vector options.
      * @return demodulator instance
      */
-    public static IFmDemodulator getFmDemodulator()
+    public static IAmDemodulator getAmDemodulator(float gain)
     {
-        Implementation implementation = CalibrationManager.getInstance().getImplementation(CalibrationType.FM_DEMODULATOR);
+        Implementation implementation = CalibrationManager.getInstance().getImplementation(CalibrationType.AM_DEMODULATOR);
 
         switch(implementation)
         {
             case VECTOR_SIMD_64:
-                return new VectorFMDemodulator64();
+                return new VectorAMDemodulator64(gain);
             case VECTOR_SIMD_128:
-                return new VectorFMDemodulator128();
+                return new VectorAMDemodulator128(gain);
             case VECTOR_SIMD_256:
-                return new VectorFMDemodulator256();
             case VECTOR_SIMD_512:
-                return new VectorFMDemodulator512();
+            case VECTOR_SIMD_PREFERRED:
+                return new VectorAMDemodulator64(gain);
             case SCALAR:
+                return new ScalarAMDemodulator(gain);
             default:
-                return new ScalarFMDemodulator();
+                mLog.warn("Unrecognized optimal operation for AM demodulator: " + implementation.name());
+                return new ScalarAMDemodulator(gain);
         }
-    }
-
-    /**
-     * Creates the optimal Squelching FM demodulator using calibration data to select the optimal
-     * implementation from scalar and vector options.
-     * @return demodulator instance
-     */
-    public static ISquelchingFmDemodulator getSquelchingFmDemodulator(float alpha, float threshold, int ramp)
-    {
-        return new SquelchingFMDemodulator(alpha, threshold, ramp);
     }
 }

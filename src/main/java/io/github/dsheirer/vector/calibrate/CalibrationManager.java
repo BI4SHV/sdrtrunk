@@ -1,6 +1,6 @@
 /*
  * *****************************************************************************
- * Copyright (C) 2014-2022 Dennis Sheirer
+ * Copyright (C) 2014-2023 Dennis Sheirer
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,6 @@ import io.github.dsheirer.vector.calibrate.airspy.AirspySampleConverterCalibrati
 import io.github.dsheirer.vector.calibrate.airspy.AirspyUnpackedCalibration;
 import io.github.dsheirer.vector.calibrate.airspy.AirspyUnpackedInterleavedCalibration;
 import io.github.dsheirer.vector.calibrate.demodulator.FmDemodulatorCalibration;
-import io.github.dsheirer.vector.calibrate.demodulator.SquelchingFmDemodulatorCalibration;
 import io.github.dsheirer.vector.calibrate.filter.FirFilterCalibration;
 import io.github.dsheirer.vector.calibrate.filter.RealDcRemovalCalibration;
 import io.github.dsheirer.vector.calibrate.filter.RealHalfBand11TapFilterCalibration;
@@ -39,15 +38,14 @@ import io.github.dsheirer.vector.calibrate.mixer.ComplexMixerCalibration;
 import io.github.dsheirer.vector.calibrate.oscillator.ComplexOscillatorCalibration;
 import io.github.dsheirer.vector.calibrate.oscillator.RealOscillatorCalibration;
 import io.github.dsheirer.vector.calibrate.window.WindowCalibration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Determines the optimal (scalar vs vector) class to use for the current CPU architecture.
@@ -112,7 +110,6 @@ public class CalibrationManager
             sInstance.add(new RealHalfBand63TapFilterCalibration());
             sInstance.add(new RealHalfBandDefaultFilterCalibration());
             sInstance.add(new RealOscillatorCalibration());
-            sInstance.add(new SquelchingFmDemodulatorCalibration());
 
 //            sInstance.add(new HilbertCalibration()); //Not currently used
             sInstance.add(new WindowCalibration()); //Not currently used
