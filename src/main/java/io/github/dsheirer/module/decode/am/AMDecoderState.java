@@ -17,7 +17,7 @@
  * ****************************************************************************
  */
 
-package io.github.dsheirer.module.decode.nbfm;
+package io.github.dsheirer.module.decode.am;
 
 import io.github.dsheirer.identifier.Form;
 import io.github.dsheirer.identifier.Identifier;
@@ -27,9 +27,9 @@ import io.github.dsheirer.identifier.string.SimpleStringIdentifier;
 import io.github.dsheirer.module.decode.analog.AnalogDecoderState;
 
 /**
- * NBFM decoder state
+ * AM decoder state
  */
-public class NBFMDecoderState extends AnalogDecoderState
+public class AMDecoderState extends AnalogDecoderState
 {
     private String mChannelName;
     private Identifier mChannelNameIdentifier;
@@ -40,11 +40,11 @@ public class NBFMDecoderState extends AnalogDecoderState
      * @param channelName to use for this channel
      * @param decodeConfig with talkgroup identifier
      */
-    public NBFMDecoderState(String channelName, DecodeConfigNBFM decodeConfig)
+    public AMDecoderState(String channelName, DecodeConfigAM decodeConfig)
     {
-        mChannelName = (channelName != null && !channelName.isEmpty()) ? channelName : "NBFM CHANNEL";
+        mChannelName = (channelName != null && !channelName.isEmpty()) ? channelName : "AM CHANNEL";
         mChannelNameIdentifier = new SimpleStringIdentifier(mChannelName, IdentifierClass.CONFIGURATION, Form.CHANNEL_NAME, Role.ANY);
-        mTalkgroupIdentifier = new NBFMTalkgroup(decodeConfig.getTalkgroup());
+        mTalkgroupIdentifier = new AMTalkgroup(decodeConfig.getTalkgroup());
     }
 
     @Override
@@ -64,8 +64,9 @@ public class NBFMDecoderState extends AnalogDecoderState
     {
         StringBuilder sb = new StringBuilder();
         sb.append("Activity Summary\n");
-        sb.append("\tDecoder: NBFM");
+        sb.append("\tDecoder: AM");
         sb.append("\n\n");
         return sb.toString();
     }
+
 }

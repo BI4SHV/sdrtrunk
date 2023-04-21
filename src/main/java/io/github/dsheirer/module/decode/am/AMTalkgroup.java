@@ -19,33 +19,28 @@
 
 package io.github.dsheirer.module.decode.am;
 
-import io.github.dsheirer.dsp.am.SquelchingAMDemodulator;
-import io.github.dsheirer.dsp.gain.AutomaticGainControl;
-import io.github.dsheirer.module.decode.DecoderType;
-import io.github.dsheirer.module.decode.analog.SquelchingAnalogDecoder;
+import io.github.dsheirer.identifier.Role;
+import io.github.dsheirer.identifier.talkgroup.TalkgroupIdentifier;
+import io.github.dsheirer.protocol.Protocol;
 
 /**
- * Decoder module with integrated squelching AM demodulator
+ * AM talkgroup.  Note: this is a logical identifier that is assignable from a user-specified
+ * configuration so that AM audio events are compatible with other features of the sdrtrunk system.
  */
-public class AMDecoder extends SquelchingAnalogDecoder
+public class AMTalkgroup extends TalkgroupIdentifier
 {
-    private static final float DEMODULATOR_GAIN = 500.0f;
-    private static final float SQUELCH_ALPHA_DECAY = 0.0004f;
-    private static final float SQUELCH_THRESHOLD_DB = -78.0f;
-    private AutomaticGainControl mAGC = new AutomaticGainControl();
-
     /**
      * Constructs an instance
-     * @param config for the AM channel.
+     * @param value 1-65,535
      */
-    public AMDecoder(DecodeConfigAM config)
+    public AMTalkgroup(int value)
     {
-        super(config, new SquelchingAMDemodulator(DEMODULATOR_GAIN, SQUELCH_ALPHA_DECAY, SQUELCH_THRESHOLD_DB));
+        super(value, Role.TO);
     }
 
     @Override
-    public DecoderType getDecoderType()
+    public Protocol getProtocol()
     {
-        return DecoderType.AM;
+        return Protocol.AM;
     }
 }

@@ -37,7 +37,7 @@ public class FmDemodulatorFactory
      * implementation from scalar and vector options.
      * @return demodulator instance
      */
-    public static IFmDemodulator getFmDemodulator()
+    public static IDemodulator getFmDemodulator()
     {
         Implementation implementation = CalibrationManager.getInstance().getImplementation(CalibrationType.FM_DEMODULATOR);
 
@@ -62,7 +62,7 @@ public class FmDemodulatorFactory
      * implementation from scalar and vector options.
      * @return demodulator instance
      */
-    public static ISquelchingFmDemodulator getSquelchingFmDemodulator(float alpha, float threshold, int ramp)
+    public static ISquelchingDemodulator getSquelchingFmDemodulator(float alpha, float threshold, int ramp)
     {
         return new SquelchingFMDemodulator(alpha, threshold, ramp);
     }

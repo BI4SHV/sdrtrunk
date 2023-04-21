@@ -17,43 +17,37 @@
  * ****************************************************************************
  */
 
-package io.github.dsheirer.dsp.fm;
+package io.github.dsheirer.dsp.am;
 
+import io.github.dsheirer.dsp.fm.ISquelchingDemodulator;
 import io.github.dsheirer.dsp.magnitude.IMagnitudeCalculator;
 import io.github.dsheirer.dsp.magnitude.MagnitudeFactory;
-import io.github.dsheirer.dsp.squelch.PowerSquelch;
+import io.github.dsheirer.dsp.squelch.SimpleSquelch;
 import io.github.dsheirer.sample.Listener;
 import io.github.dsheirer.source.SourceEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- * FM Demodulator for demodulating complex samples and producing demodulated floating point samples.
- *
- * Implements listener of source events to process runtime squelch threshold change request events
- * which are forwarded to the power squelch control.
+ * AM demodulator with integrated squelch control.
  */
-public class SquelchingFMDemodulator implements ISquelchingDemodulator, Listener<SourceEvent>
+public class SquelchingAMDemodulator implements ISquelchingDemodulator, Listener<SourceEvent>
 {
-    private static final Logger mLog = LoggerFactory.getLogger(SquelchingFMDemodulator.class);
     private static final float ZERO = 0.0f;
-    private PowerSquelch mPowerSquelch;
-    private IMagnitudeCalculator mMagnitude = MagnitudeFactory.getMagnitudeCalculator();
-    private IDemodulator mFmDemodulator = FmDemodulatorFactory.getFmDemodulator();
+    private IMagnitudeCalculator mMagnitudeCalculator = MagnitudeFactory.getMagnitudeCalculator();
+    private IAmDemodulator mAmDemodulator;
+    private SimpleSquelch mSimpleSquelch;
     private boolean mSquelchChanged = false;
 
     /**
-     * Creates an FM demodulator instance with a default gain of 1.0.
-     *
+     * Constructs an instance
+     * @param gain to apply to the demodulated AM samples (e.g. 500.0f)
      * @param alpha decay value of the single pole IIR filter in range: 0.0 - 1.0.  The smaller the alpha value,
      * the slower the squelch response.
      * @param squelchThreshold in decibels.  Signal power must exceed this threshold value for unsquelch.
-     * @param ramp count of samples before transition between mute and unmute.  Setting this value to zero
-     * causes immediate mute and unmute.  Set to higher count to prevent mute/unmute flapping.
      */
-    public SquelchingFMDemodulator(float alpha, float squelchThreshold, int ramp)
+    public SquelchingAMDemodulator(float gain, float alpha, float squelchThreshold)
     {
-        mPowerSquelch = new PowerSquelch(alpha, squelchThreshold, ramp);
+        mAmDemodulator = AmDemodulatorFactory.getAmDemodulator(gain);
+        mSimpleSquelch = new SimpleSquelch(alpha, squelchThreshold);
     }
 
     /**
@@ -62,7 +56,7 @@ public class SquelchingFMDemodulator implements ISquelchingDemodulator, Listener
      */
     public void setSampleRate(int sampleRate)
     {
-        mPowerSquelch.setSampleRate(sampleRate);
+        mSimpleSquelch.setSampleRate(sampleRate);
     }
 
     /**
@@ -70,33 +64,30 @@ public class SquelchingFMDemodulator implements ISquelchingDemodulator, Listener
      */
     public void setSourceEventListener(Listener<SourceEvent> listener)
     {
-        mPowerSquelch.setSourceEventListener(listener);
+        mSimpleSquelch.setSourceEventListener(listener);
     }
 
     /**
-     * Demodulates the complex (I/Q) sample arrays
-     * @param i inphase samples
-     * @param q quadrature samples
-     * @return demodulated real samples
+     * Demodulates the complex sample arrays.
+     * @param i inphase sample array
+     * @param q quadrature sample array
+     * @return demodulated AM samples with gain applied.
      */
-    @Override
     public float[] demodulate(float[] i, float[] q)
     {
-        setSquelchChanged(false);
-
-        float[] demodulated = mFmDemodulator.demodulate(i, q);
-        float[] magnitude = mMagnitude.getMagnitude(i, q);
+        float[] magnitude = mMagnitudeCalculator.getMagnitude(i, q);
+        float[] demodulated = mAmDemodulator.demodulateMagnitude(magnitude);
 
         for(int x = 0; x < i.length; x++)
         {
-            mPowerSquelch.process(magnitude[x]);
+            mSimpleSquelch.process(magnitude[x]);
 
-            if(!(mPowerSquelch.isUnmuted() || mPowerSquelch.isDecay()))
+            if(!(mSimpleSquelch.isUnmuted()))
             {
                 demodulated[x] = ZERO;
             }
 
-            if(mPowerSquelch.isSquelchChanged())
+            if(mSimpleSquelch.isSquelchChanged())
             {
                 setSquelchChanged(true);
             }
@@ -111,7 +102,7 @@ public class SquelchingFMDemodulator implements ISquelchingDemodulator, Listener
      */
     public void setSquelchThreshold(double threshold)
     {
-        mPowerSquelch.setSquelchThreshold(threshold);
+        mSimpleSquelch.setSquelchThreshold(threshold);
     }
 
     /**
@@ -135,20 +126,24 @@ public class SquelchingFMDemodulator implements ISquelchingDemodulator, Listener
      */
     public boolean isMuted()
     {
-        return mPowerSquelch.isMuted();
+        return mSimpleSquelch.isMuted();
     }
 
+    /**
+     * Process source events initiated by the timer and end-user.
+     * @param sourceEvent to process.
+     */
     @Override
     public void receive(SourceEvent sourceEvent)
     {
         //Only forward squelch threshold change request and set squelch threshold request events
         if(sourceEvent.getEvent() == SourceEvent.Event.REQUEST_CHANGE_SQUELCH_THRESHOLD)
         {
-            mPowerSquelch.receive(sourceEvent);
+            mSimpleSquelch.receive(sourceEvent);
         }
         else if(sourceEvent.getEvent() == SourceEvent.Event.REQUEST_CURRENT_SQUELCH_THRESHOLD)
         {
-            mPowerSquelch.receive(sourceEvent);
+            mSimpleSquelch.receive(sourceEvent);
         }
     }
 }

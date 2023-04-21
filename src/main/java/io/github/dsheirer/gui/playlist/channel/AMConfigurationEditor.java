@@ -1,6 +1,6 @@
 /*
  * *****************************************************************************
- * Copyright (C) 2014-2022 Dennis Sheirer
+ * Copyright (C) 2014-2023 Dennis Sheirer
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,7 +51,6 @@ public class AMConfigurationEditor extends ChannelConfigurationEditor
     private TitledPane mDecoderPane;
     private TitledPane mRecordPane;
     private TitledPane mSourcePane;
-    private ToggleSwitch mAudioRecordSwitch;
     private ToggleSwitch mBasebandRecordSwitch;
     private SourceConfigurationEditor mSourceConfigurationEditor;
 
@@ -113,9 +112,6 @@ public class AMConfigurationEditor extends ChannelConfigurationEditor
             gridPane.setHgap(10);
             gridPane.setVgap(10);
 
-            GridPane.setConstraints(getAudioRecordSwitch(), 0, 0);
-            gridPane.getChildren().add(getAudioRecordSwitch());
-
             Label recordAudioLabel = new Label("Audio");
             GridPane.setHalignment(recordAudioLabel, HPos.LEFT);
             GridPane.setConstraints(recordAudioLabel, 1, 0);
@@ -149,19 +145,6 @@ public class AMConfigurationEditor extends ChannelConfigurationEditor
         return mSourceConfigurationEditor;
     }
 
-    private ToggleSwitch getAudioRecordSwitch()
-    {
-        if(mAudioRecordSwitch == null)
-        {
-            mAudioRecordSwitch = new ToggleSwitch();
-            mAudioRecordSwitch.setDisable(true);
-            mAudioRecordSwitch.setTextAlignment(TextAlignment.RIGHT);
-            mAudioRecordSwitch.selectedProperty().addListener((observable, oldValue, newValue) -> modifiedProperty().set(true));
-        }
-
-        return mAudioRecordSwitch;
-    }
-
     private ToggleSwitch getBasebandRecordSwitch()
     {
         if(mBasebandRecordSwitch == null)
@@ -179,16 +162,13 @@ public class AMConfigurationEditor extends ChannelConfigurationEditor
     @Override
     protected void setDecoderConfiguration(DecodeConfiguration config)
     {
+        mLog.warn("Update the AM editor with talkgroup and squelch threshold controls");
         if(config instanceof DecodeConfigAM)
         {
             DecodeConfigAM decodeConfig = (DecodeConfigAM)config;
-            getAudioRecordSwitch().setDisable(false);
-            getAudioRecordSwitch().selectedProperty().set(decodeConfig.getRecordAudio());
         }
         else
         {
-            getAudioRecordSwitch().setDisable(true);
-            getAudioRecordSwitch().selectedProperty().set(false);
         }
     }
 
@@ -206,7 +186,6 @@ public class AMConfigurationEditor extends ChannelConfigurationEditor
             config = new DecodeConfigAM();
         }
 
-        config.setRecordAudio(getAudioRecordSwitch().isSelected());
         getItem().setDecodeConfiguration(config);
     }
 

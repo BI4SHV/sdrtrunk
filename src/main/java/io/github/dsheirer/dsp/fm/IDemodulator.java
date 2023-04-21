@@ -17,17 +17,18 @@
  * ****************************************************************************
  */
 
-package io.github.dsheirer.dsp.am;
+package io.github.dsheirer.dsp.fm;
 
 /**
- * AM Demodulator interface
+ * Interface for demodulator of complex sample arrays.
  */
-public interface IAmDemodulator
+public interface IDemodulator
 {
     /**
-     * Demodulates an array of vector squared magnitudes.
-     * @param magnitude values that are squared.
-     * @return demodulated samples
+     * Demodulate the complex sample array and return an array of real audio samples.
+     * @param i samples to demodulate
+     * @param q samples to demodulate
+     * @return demodulated samples.
      */
-    float[] demodulateMagnitude(float[] magnitude);
+    float[] demodulate(float[] i, float[] q);
 }

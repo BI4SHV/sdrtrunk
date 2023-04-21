@@ -19,7 +19,7 @@
 
 package io.github.dsheirer.vector.calibrate.demodulator;
 
-import io.github.dsheirer.dsp.fm.IFmDemodulator;
+import io.github.dsheirer.dsp.fm.IDemodulator;
 import io.github.dsheirer.dsp.fm.ScalarFMDemodulator;
 import io.github.dsheirer.dsp.fm.VectorFMDemodulator128;
 import io.github.dsheirer.dsp.fm.VectorFMDemodulator256;
@@ -40,11 +40,11 @@ public class FmDemodulatorCalibration extends Calibration
     private static final int ITERATION_DURATION_MS = 1000;
     private static final int WARMUP_ITERATIONS = 5;
     private static final int TEST_ITERATIONS = 5;
-    private IFmDemodulator mScalarDemodulator = new ScalarFMDemodulator();
-    private IFmDemodulator mVectorDemodulator64 = new VectorFMDemodulator64();
-    private IFmDemodulator mVectorDemodulator128 = new VectorFMDemodulator128();
-    private IFmDemodulator mVectorDemodulator256 = new VectorFMDemodulator256();
-    private IFmDemodulator mVectorDemodulator512 = new VectorFMDemodulator512();
+    private IDemodulator mScalarDemodulator = new ScalarFMDemodulator();
+    private IDemodulator mVectorDemodulator64 = new VectorFMDemodulator64();
+    private IDemodulator mVectorDemodulator128 = new VectorFMDemodulator128();
+    private IDemodulator mVectorDemodulator256 = new VectorFMDemodulator256();
+    private IDemodulator mVectorDemodulator512 = new VectorFMDemodulator512();
 
     /**
      * Constructs an instance

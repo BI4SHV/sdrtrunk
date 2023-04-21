@@ -19,6 +19,8 @@
 
 package io.github.dsheirer.dsp.am;
 
+import io.github.dsheirer.dsp.magnitude.IMagnitudeCalculator;
+import io.github.dsheirer.dsp.magnitude.MagnitudeFactory;
 import io.github.dsheirer.vector.calibrate.Calibration;
 import io.github.dsheirer.vector.calibrate.CalibrationException;
 import io.github.dsheirer.vector.calibrate.CalibrationType;
@@ -34,6 +36,7 @@ public class AmDemodulatorCalibration extends Calibration
     private static final int ITERATION_DURATION_MS = 1000;
     private static final int WARMUP_ITERATIONS = 5;
     private static final int TEST_ITERATIONS = 5;
+    private IMagnitudeCalculator mMagnitudeCalculator = MagnitudeFactory.getMagnitudeCalculator();
     private IAmDemodulator mScalarDemodulator = new ScalarAMDemodulator(500.0f);
     private IAmDemodulator mVectorDemodulator64 = new VectorAMDemodulator64(500.0f);
     private IAmDemodulator mVectorDemodulator128 = new VectorAMDemodulator128(500.0f);
@@ -51,14 +54,13 @@ public class AmDemodulatorCalibration extends Calibration
 
     @Override public void calibrate() throws CalibrationException
     {
-        float[] i = getFloatSamples(BUFFER_SIZE);
-        float[] q = getFloatSamples(BUFFER_SIZE);
+        float[] magnitude = getFloatSamples(BUFFER_SIZE);
 
         Mean scalarMean = new Mean();
 
         for(int x = 0; x < WARMUP_ITERATIONS; x++)
         {
-            long score = testScalar(i, q);
+            long score = testScalar(magnitude);
             scalarMean.increment(score);
         }
 
@@ -68,7 +70,7 @@ public class AmDemodulatorCalibration extends Calibration
 
         for(int x = 0; x < WARMUP_ITERATIONS; x++)
         {
-            long score = testVector64(i, q);
+            long score = testVector64(magnitude);
             vector64Mean.increment(score);
         }
 
@@ -78,7 +80,7 @@ public class AmDemodulatorCalibration extends Calibration
 
         for(int x = 0; x < WARMUP_ITERATIONS; x++)
         {
-            long score = testVector128(i, q);
+            long score = testVector128(magnitude);
             vector128Mean.increment(score);
         }
 
@@ -88,7 +90,7 @@ public class AmDemodulatorCalibration extends Calibration
 
         for(int x = 0; x < WARMUP_ITERATIONS; x++)
         {
-            long score = testVector256(i, q);
+            long score = testVector256(magnitude);
             vector256Mean.increment(score);
         }
 
@@ -98,7 +100,7 @@ public class AmDemodulatorCalibration extends Calibration
 
         for(int x = 0; x < WARMUP_ITERATIONS; x++)
         {
-            long score = testVector512(i, q);
+            long score = testVector512(magnitude);
             vector512Mean.increment(score);
         }
 
@@ -109,7 +111,7 @@ public class AmDemodulatorCalibration extends Calibration
 
         for(int x = 0; x < TEST_ITERATIONS; x++)
         {
-            long score = testScalar(i, q);
+            long score = testScalar(magnitude);
             scalarMean.increment(score);
         }
 
@@ -119,7 +121,7 @@ public class AmDemodulatorCalibration extends Calibration
 
         for(int x = 0; x < TEST_ITERATIONS; x++)
         {
-            long score = testVector64(i, q);
+            long score = testVector64(magnitude);
             vector64Mean.increment(score);
         }
 
@@ -129,7 +131,7 @@ public class AmDemodulatorCalibration extends Calibration
 
         for(int x = 0; x < TEST_ITERATIONS; x++)
         {
-            long score = testVector128(i, q);
+            long score = testVector128(magnitude);
             vector128Mean.increment(score);
         }
 
@@ -139,7 +141,7 @@ public class AmDemodulatorCalibration extends Calibration
 
         for(int x = 0; x < TEST_ITERATIONS; x++)
         {
-            long score = testVector256(i, q);
+            long score = testVector256(magnitude);
             vector256Mean.increment(score);
         }
 
@@ -149,7 +151,7 @@ public class AmDemodulatorCalibration extends Calibration
 
         for(int x = 0; x < TEST_ITERATIONS; x++)
         {
-            long score = testVector512(i, q);
+            long score = testVector512(magnitude);
             vector512Mean.increment(score);
         }
 
@@ -186,8 +188,9 @@ public class AmDemodulatorCalibration extends Calibration
         mLog.info("AM DEMODULATOR - SET OPTIMAL IMPLEMENTATION TO:" + getImplementation());
     }
 
-    private long testScalar(float[] i, float[] q)
+    private long testScalar(float[] magnitude)
     {
+
         double accumulator = 0.0;
         long count = 0;
 
@@ -195,7 +198,7 @@ public class AmDemodulatorCalibration extends Calibration
 
         while((System.currentTimeMillis() - start) < ITERATION_DURATION_MS)
         {
-            float[] demodulated = mScalarDemodulator.demodulate(i, q);
+            float[] demodulated = mScalarDemodulator.demodulateMagnitude(magnitude);
             accumulator += demodulated[1];
             count++;
         }
@@ -203,7 +206,7 @@ public class AmDemodulatorCalibration extends Calibration
         return count + (long)(accumulator * 0);
     }
 
-    private long testVector64(float[] i, float[] q)
+    private long testVector64(float[] magnitude)
     {
         double accumulator = 0.0;
         long count = 0;
@@ -211,7 +214,7 @@ public class AmDemodulatorCalibration extends Calibration
 
         while((System.currentTimeMillis() - start) < ITERATION_DURATION_MS)
         {
-            float[] demodulated = mVectorDemodulator64.demodulate(i, q);
+            float[] demodulated = mVectorDemodulator64.demodulateMagnitude(magnitude);
             accumulator += demodulated[1];
             count++;
         }
@@ -219,7 +222,7 @@ public class AmDemodulatorCalibration extends Calibration
         return count + (long)(accumulator * 0);
     }
 
-    private long testVector128(float[] i, float[] q)
+    private long testVector128(float[] magnitude)
     {
         double accumulator = 0.0;
         long count = 0;
@@ -227,7 +230,7 @@ public class AmDemodulatorCalibration extends Calibration
 
         while((System.currentTimeMillis() - start) < ITERATION_DURATION_MS)
         {
-            float[] demodulated = mVectorDemodulator128.demodulate(i, q);
+            float[] demodulated = mVectorDemodulator128.demodulateMagnitude(magnitude);
             accumulator += demodulated[1];
             count++;
         }
@@ -235,7 +238,7 @@ public class AmDemodulatorCalibration extends Calibration
         return count + (long)(accumulator * 0);
     }
 
-    private long testVector256(float[] i, float[] q)
+    private long testVector256(float[] magnitude)
     {
         double accumulator = 0.0;
         long count = 0;
@@ -243,7 +246,7 @@ public class AmDemodulatorCalibration extends Calibration
 
         while((System.currentTimeMillis() - start) < ITERATION_DURATION_MS)
         {
-            float[] demodulated = mVectorAMDemodulator256.demodulate(i, q);
+            float[] demodulated = mVectorAMDemodulator256.demodulateMagnitude(magnitude);
             accumulator += demodulated[1];
             count++;
         }
@@ -251,7 +254,7 @@ public class AmDemodulatorCalibration extends Calibration
         return count + (long)(accumulator * 0);
     }
 
-    private long testVector512(float[] i, float[] q)
+    private long testVector512(float[] magnitude)
     {
         double accumulator = 0.0;
         long count = 0;
@@ -259,7 +262,7 @@ public class AmDemodulatorCalibration extends Calibration
 
         while((System.currentTimeMillis() - start) < ITERATION_DURATION_MS)
         {
-            float[] demodulated = mVectorAMDemodulator512.demodulate(i, q);
+            float[] demodulated = mVectorAMDemodulator512.demodulateMagnitude(magnitude);
             accumulator += demodulated[1];
             count++;
         }

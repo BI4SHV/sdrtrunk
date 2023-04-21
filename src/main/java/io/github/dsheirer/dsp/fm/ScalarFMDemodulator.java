@@ -23,7 +23,7 @@ import org.apache.commons.math3.util.FastMath;
 /**
  * FM Demodulator for demodulating complex samples and producing demodulated floating point samples.
  */
-public class ScalarFMDemodulator implements IFmDemodulator
+public class ScalarFMDemodulator implements IDemodulator
 {
     protected float mPreviousI = 0.0f;
     protected float mPreviousQ = 0.0f;

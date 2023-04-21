@@ -1,7 +1,6 @@
 /*
- * ******************************************************************************
- * sdrtrunk
- * Copyright (C) 2014-2019 Dennis Sheirer
+ * *****************************************************************************
+ * Copyright (C) 2014-2023 Dennis Sheirer
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +14,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
- * *****************************************************************************
+ * ****************************************************************************
  */
 
 package io.github.dsheirer.alias.id.talkgroup;
@@ -23,21 +22,20 @@ package io.github.dsheirer.alias.id.talkgroup;
 import io.github.dsheirer.preference.identifier.IntegerFormat;
 import io.github.dsheirer.preference.identifier.talkgroup.APCO25TalkgroupFormatter;
 import io.github.dsheirer.preference.identifier.talkgroup.AbstractIntegerFormatter;
+import io.github.dsheirer.preference.identifier.talkgroup.AnalogTalkgroupFormatter;
 import io.github.dsheirer.preference.identifier.talkgroup.DMRTalkgroupFormatter;
 import io.github.dsheirer.preference.identifier.talkgroup.FleetsyncTalkgroupFormatter;
 import io.github.dsheirer.preference.identifier.talkgroup.LTRTalkgroupFormatter;
 import io.github.dsheirer.preference.identifier.talkgroup.MDC1200TalkgroupFormatter;
 import io.github.dsheirer.preference.identifier.talkgroup.MPT1327TalkgroupFormatter;
-import io.github.dsheirer.preference.identifier.talkgroup.NBFMTalkgroupFormatter;
 import io.github.dsheirer.preference.identifier.talkgroup.PassportTalkgroupFormatter;
 import io.github.dsheirer.preference.identifier.talkgroup.UnknownTalkgroupFormatter;
 import io.github.dsheirer.protocol.Protocol;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.text.ParseException;
 import java.util.EnumMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Protocol-specific formatting of talkgroup values and parsing of formatted talkgroup values.
@@ -57,7 +55,7 @@ public class TalkgroupFormatter
         mFormatterMap.put(Protocol.LTR_NET, ltr);
         mFormatterMap.put(Protocol.MDC1200, new MDC1200TalkgroupFormatter());
         mFormatterMap.put(Protocol.MPT1327, new MPT1327TalkgroupFormatter());
-        mFormatterMap.put(Protocol.NBFM, new NBFMTalkgroupFormatter());
+        mFormatterMap.put(Protocol.NBFM, new AnalogTalkgroupFormatter());
         mFormatterMap.put(Protocol.PASSPORT, new PassportTalkgroupFormatter());
         mFormatterMap.put(Protocol.UNKNOWN, new UnknownTalkgroupFormatter());
     }

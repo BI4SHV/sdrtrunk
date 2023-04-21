@@ -64,15 +64,15 @@ public class VectorAMDemodulator128 implements IAmDemodulator
         return (float) FastMath.sqrt((inphase * inphase) + (quadrature * quadrature)) * mGain;
     }
 
-    @Override public float[] demodulate(float[] i, float[] q)
+    @Override
+    public float[] demodulateMagnitude(float[] magnitude)
     {
-        VectorUtilities.checkComplexArrayLength(i, q, VECTOR_SPECIES);
+        VectorUtilities.checkArrayLength(magnitude, VECTOR_SPECIES);
         FloatVector gain = FloatVector.broadcast(VECTOR_SPECIES, mGain);
-        float[] demodulated = new float[i.length];
-        float[] magnitude = mMagnitudeCalculator.getMagnitude(i, q);
+        float[] demodulated = new float[magnitude.length];
 
         FloatVector vector;
-        for(int x = 0; x < i.length; x += VECTOR_SPECIES.length())
+        for(int x = 0; x < magnitude.length; x += VECTOR_SPECIES.length())
         {
             vector = FloatVector.fromArray(VECTOR_SPECIES, magnitude, x);
             vector.sqrt().mul(gain).intoArray(demodulated, x);

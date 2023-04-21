@@ -18,8 +18,6 @@
  */
 package io.github.dsheirer.dsp.am;
 
-import io.github.dsheirer.dsp.magnitude.IMagnitudeCalculator;
-import io.github.dsheirer.dsp.magnitude.MagnitudeFactory;
 import org.apache.commons.math3.util.FastMath;
 
 /**
@@ -28,7 +26,6 @@ import org.apache.commons.math3.util.FastMath;
 public class ScalarAMDemodulator implements IAmDemodulator
 {
     private float mGain;
-    private IMagnitudeCalculator mMagnitudeCalculator = MagnitudeFactory.getMagnitudeCalculator();
 
     /**
      * Constructs this demodulator where the specified gain is applied to demodulated output samples.
@@ -60,12 +57,11 @@ public class ScalarAMDemodulator implements IAmDemodulator
         return (float) FastMath.sqrt((inphase * inphase) + (quadrature * quadrature)) * mGain;
     }
 
-    @Override public float[] demodulate(float[] i, float[] q)
+    @Override
+    public float[] demodulateMagnitude(float[] magnitude)
     {
-        float[] demodulated = new float[i.length];
-        float[] magnitude = mMagnitudeCalculator.getMagnitude(i, q);
-
-        for(int x = 0; x < i.length; x++)
+        float[] demodulated = new float[magnitude.length];
+        for(int x = 0; x < magnitude.length; x++)
         {
             demodulated[x] = (float)FastMath.sqrt(magnitude[x]) * mGain;
         }

@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 /**
  * FM demodulator that uses JDK 17+ SIMD vector intrinsics
  */
-public class VectorFMDemodulator128 implements IFmDemodulator
+public class VectorFMDemodulator128 implements IDemodulator
 {
     private static final Logger mLog = LoggerFactory.getLogger(VectorFMDemodulator128.class);
     protected static final float ZERO = 0.0f;
