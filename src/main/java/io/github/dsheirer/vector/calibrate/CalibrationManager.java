@@ -19,6 +19,7 @@
 
 package io.github.dsheirer.vector.calibrate;
 
+import io.github.dsheirer.dsp.am.AmDemodulatorCalibration;
 import io.github.dsheirer.preference.UserPreferences;
 import io.github.dsheirer.preference.calibration.VectorCalibrationPreference;
 import io.github.dsheirer.vector.calibrate.airspy.AirspySampleConverterCalibration;
@@ -34,6 +35,7 @@ import io.github.dsheirer.vector.calibrate.filter.RealHalfBand63TapFilterCalibra
 import io.github.dsheirer.vector.calibrate.filter.RealHalfBandDefaultFilterCalibration;
 import io.github.dsheirer.vector.calibrate.gain.ComplexGainCalibration;
 import io.github.dsheirer.vector.calibrate.gain.ComplexGainControlCalibration;
+import io.github.dsheirer.vector.calibrate.magnitude.MagnitudeCalibration;
 import io.github.dsheirer.vector.calibrate.mixer.ComplexMixerCalibration;
 import io.github.dsheirer.vector.calibrate.oscillator.ComplexOscillatorCalibration;
 import io.github.dsheirer.vector.calibrate.oscillator.RealOscillatorCalibration;
@@ -97,12 +99,14 @@ public class CalibrationManager
             sInstance.add(new AirspySampleConverterCalibration());
             sInstance.add(new AirspyUnpackedCalibration());
             sInstance.add(new AirspyUnpackedInterleavedCalibration());
+            sInstance.add(new AmDemodulatorCalibration());
             sInstance.add(new ComplexGainCalibration());
             sInstance.add(new ComplexGainControlCalibration());
             sInstance.add(new ComplexOscillatorCalibration());
             sInstance.add(new ComplexMixerCalibration());
             sInstance.add(new FirFilterCalibration());
             sInstance.add(new FmDemodulatorCalibration());
+            sInstance.add(new MagnitudeCalibration());
             sInstance.add(new RealDcRemovalCalibration());
             sInstance.add(new RealHalfBand11TapFilterCalibration());
             sInstance.add(new RealHalfBand15TapFilterCalibration());

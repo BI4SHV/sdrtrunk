@@ -51,7 +51,7 @@ public class MagnitudeCalibration extends Calibration
      */
     public MagnitudeCalibration()
     {
-        super(CalibrationType.FM_DEMODULATOR);
+        super(CalibrationType.MAGNITUDE);
     }
 
     @Override public void calibrate() throws CalibrationException

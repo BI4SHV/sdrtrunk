@@ -75,6 +75,8 @@ public class SquelchingAMDemodulator implements ISquelchingDemodulator, Listener
      */
     public float[] demodulate(float[] i, float[] q)
     {
+        setSquelchChanged(false);
+
         float[] magnitude = mMagnitudeCalculator.getMagnitude(i, q);
         float[] demodulated = mAmDemodulator.demodulateMagnitude(magnitude);
 

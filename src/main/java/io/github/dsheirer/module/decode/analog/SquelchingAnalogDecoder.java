@@ -155,34 +155,58 @@ public abstract class SquelchingAnalogDecoder extends PrimaryDecoder implements 
 
         if(mResampler != null)
         {
-            //If we're currently squelched and the squelch state changed while demodulating the baseband samples,
-            // then un-squelch so we can send this buffer
-            if(mSquelch && mDemodulator.isSquelchChanged())
+            //Squelch changed while processing this audio buffer
+            if(mDemodulator.isSquelchChanged())
             {
-                mSquelch = false;
-                notifyCallStart();
-            }
+                if(mDemodulator.isMuted())
+                {
+                    //Demodulator says to mute and we're already muted/squelched = Continue IDLE
+                    if(mSquelch)
+                    {
+                        notifyIdle();
+                    }
+                    //Demodulator says to mute and we are unmuted = Squelch and End Call
+                    else
+                    {
+                        mSquelch = true;
+                        notifyCallEnd();
+                    }
+                }
+                else
+                {
+                    //Demodulator says to unmute and we're muted/squelched = Unmute and Start Call
+                    if(mSquelch)
+                    {
+                        mSquelch = false;
+                        notifyCallStart();
+                    }
+                    //Demodulator says to unmute and we're already unmuted = Continue Call
+                    else
+                    {
+                        notifyCallContinuation();
+                    }
 
-            //Either send the demodulated buffer to the resampler for distro, or decrement the user count
-            if(mSquelch)
-            {
-                notifyIdle();
+                    mResampler.resample(demodulated);
+                }
             }
             else
             {
-                mResampler.resample(demodulated);
-                notifyCallContinuation();
-            }
-
-            //Set to squelch if necessary to close out the audio buffers
-            if(!mSquelch && mDemodulator.isMuted())
-            {
-                mSquelch = true;
-                notifyCallEnd();
+                //Demodulator says squelch state didn't change and we're muted/squelched = Continue IDLE
+                if(mSquelch)
+                {
+                    notifyIdle();
+                }
+                //Demodulator says squelch state didn't change and we're unmuted/unsquelched = Continue CALL
+                else
+                {
+                    notifyCallContinuation();
+                    mResampler.resample(demodulated);
+                }
             }
         }
         else
         {
+            //This shouldn't happen
             notifyIdle();
         }
     }

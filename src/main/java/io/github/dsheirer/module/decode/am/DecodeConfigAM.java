@@ -42,7 +42,7 @@ public class DecodeConfigAM extends DecodeConfigAnalog
     @Override
     protected Bandwidth getDefaultBandwidth()
     {
-        return Bandwidth.BW_5_0;
+        return Bandwidth.BW_15_0;
     }
 
     /**
@@ -58,10 +58,12 @@ public class DecodeConfigAM extends DecodeConfigAnalog
                 return new ChannelSpecification(25000.0, 3000, 1500.0, 1700.0);
             case BW_5_0:
                 return new ChannelSpecification(25000.0, 5000, 2500.0, 2700.0);
-            case BW_10_0:
+            case BW_8_33:
                 return new ChannelSpecification(25000.0, 10000, 5000.0, 7000.0);
             case BW_15_0:
-                return new ChannelSpecification(25000.0, 15000, 7500.0, 7700.0);
+                return new ChannelSpecification(25000.0, 15000, 7500.0, 9500.0);
+            case BW_25_0:
+                return new ChannelSpecification(25000.0, 25000, 12500.0, 14500.0);
             default:
                 throw new IllegalArgumentException("Unrecognized AM bandwidth value: " + getBandwidth());
         }

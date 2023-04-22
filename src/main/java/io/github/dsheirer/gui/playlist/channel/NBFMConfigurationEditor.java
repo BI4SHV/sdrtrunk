@@ -27,6 +27,7 @@ import io.github.dsheirer.gui.playlist.eventlog.EventLogConfigurationEditor;
 import io.github.dsheirer.gui.playlist.source.FrequencyEditor;
 import io.github.dsheirer.gui.playlist.source.SourceConfigurationEditor;
 import io.github.dsheirer.module.decode.DecoderType;
+import io.github.dsheirer.module.decode.analog.DecodeConfigAnalog;
 import io.github.dsheirer.module.decode.config.AuxDecodeConfiguration;
 import io.github.dsheirer.module.decode.config.DecodeConfiguration;
 import io.github.dsheirer.module.decode.nbfm.DecodeConfigNBFM;
@@ -274,7 +275,7 @@ public class NBFMConfigurationEditor extends ChannelConfigurationEditor
             mBandwidthButton.getStyleClass().add(SegmentedButton.STYLE_CLASS_DARK);
             mBandwidthButton.setDisable(true);
 
-            for(DecodeConfigNBFM.Bandwidth bandwidth : DecodeConfigNBFM.Bandwidth.values())
+            for(DecodeConfigNBFM.Bandwidth bandwidth : DecodeConfigNBFM.Bandwidth.FM_BANDWIDTHS)
             {
                 ToggleButton toggleButton = new ToggleButton(bandwidth.toString());
                 toggleButton.setUserData(bandwidth);
@@ -338,6 +339,7 @@ public class NBFMConfigurationEditor extends ChannelConfigurationEditor
         {
             mSquelchThresholdField = new TextField();
             mSquelchThresholdField.setTextFormatter(mSquelchTextFormatter);
+            mSquelchTextFormatter.valueProperty().addListener((observable, oldValue, newValue) -> modifiedProperty().set(true));
         }
 
         return mSquelchThresholdField;
