@@ -29,7 +29,7 @@ import io.github.dsheirer.module.decode.analog.SquelchingAnalogDecoder;
  */
 public class AMDecoder extends SquelchingAnalogDecoder
 {
-    private static final float DEMODULATOR_GAIN = 500.0f;
+    private static final float DEMODULATOR_GAIN = 2000.0f;
     private static final float SQUELCH_ALPHA_DECAY = 0.0004f;
     private static final float SQUELCH_THRESHOLD_DB = -78.0f;
     private AutomaticGainControl mAGC = new AutomaticGainControl();
@@ -47,5 +47,26 @@ public class AMDecoder extends SquelchingAnalogDecoder
     public DecoderType getDecoderType()
     {
         return DecoderType.AM;
+    }
+
+    /**
+     * Overrides the broadcast of the final demodulated audio samples so that we can apply AGC
+     * @param demodulatedSamples to broadcast
+     */
+    @Override
+    protected void broadcast(float[] demodulatedSamples)
+    {
+        float[] amplified = mAGC.process(demodulatedSamples);
+        super.broadcast(amplified);
+    }
+
+    /**
+     * Overrides the notify call start so that we can reset the AGC
+     */
+    @Override
+    protected void notifyCallStart()
+    {
+        mAGC.reset();
+        super.notifyCallStart();
     }
 }

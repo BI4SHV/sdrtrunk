@@ -677,6 +677,9 @@ public class AliasItemEditor extends Editor<Alias>
             mAddIdentifierButton.setMaxWidth(Double.MAX_VALUE);
             mAddIdentifierButton.setDisable(true);
 
+            Menu amMenu = new ProtocolMenu(Protocol.AM);
+            amMenu.getItems().add(new AddTalkgroupItem(Protocol.AM));
+
             Menu p25Menu = new ProtocolMenu(Protocol.APCO25);
             p25Menu.getItems().add(new AddTalkgroupItem(Protocol.APCO25));
             p25Menu.getItems().add(new AddTalkgroupRangeItem(Protocol.APCO25));
@@ -725,7 +728,7 @@ public class AliasItemEditor extends Editor<Alias>
             Menu lojackMenu = new ProtocolMenu(Protocol.LOJACK);
             lojackMenu.getItems().add(new AddLojackItem());
 
-            mAddIdentifierButton.getItems().addAll(p25Menu, dmrMenu, fleetsyncMenu, ltrMenu, mdcMenu, mptMenu,
+            mAddIdentifierButton.getItems().addAll(amMenu, p25Menu, dmrMenu, fleetsyncMenu, ltrMenu, mdcMenu, mptMenu,
                 nbfmMenu, passportMenu, taitMenu, new SeparatorMenuItem(), lojackMenu);
         }
 

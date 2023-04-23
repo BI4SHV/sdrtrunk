@@ -130,12 +130,10 @@ public class SimpleSquelch implements Listener<SourceEvent>
 
         if(mSquelch && mPower >= mSquelchThreshold)
         {
-            mLog.info("Setting squelch to false");
             setSquelch(false);
         }
         else if(!mSquelch && mPower < mSquelchThreshold)
         {
-            mLog.info("Setting squelch to true");
             setSquelch(true);
         }
     }

@@ -61,7 +61,7 @@ public abstract class SquelchingAnalogDecoder extends PrimaryDecoder implements 
     private Listener<DecoderStateEvent> mDecoderStateEventListener;
     private double mChannelBandwidth;
     private double mOutputSampleRate = DEMODULATED_AUDIO_SAMPLE_RATE;
-    private boolean mSquelch = true;
+    protected boolean mSquelch = true;
 
     /**
      * Constructs an instance
@@ -102,6 +102,18 @@ public abstract class SquelchingAnalogDecoder extends PrimaryDecoder implements 
     @Override
     public void stop()
     {
+    }
+
+    /**
+     * Broadcasts the demodulated audio samples to the registered listener.
+     * @param demodulatedSamples to broadcast
+     */
+    protected void broadcast(float[] demodulatedSamples)
+    {
+        if(mResampledBufferListener != null)
+        {
+            mResampledBufferListener.receive(demodulatedSamples);
+        }
     }
 
     /**
@@ -214,7 +226,7 @@ public abstract class SquelchingAnalogDecoder extends PrimaryDecoder implements 
     /**
      * Broadcasts a call start state event
      */
-    private void notifyCallStart()
+    protected void notifyCallStart()
     {
         broadcast(new DecoderStateEvent(this, DecoderStateEvent.Event.START, State.CALL, 0));
     }
@@ -380,14 +392,7 @@ public abstract class SquelchingAnalogDecoder extends PrimaryDecoder implements 
                 mQBasebandFilter = FilterFactory.getRealFilter(coefficients);
 
                 mResampler = new RealResampler(decimatedSampleRate, mOutputSampleRate, 4192, 512);
-
-                mResampler.setListener(resampled ->
-                {
-                    if(mResampledBufferListener != null)
-                    {
-                        mResampledBufferListener.receive(resampled);
-                    }
-                });
+                mResampler.setListener(resampled -> broadcast(resampled));
             }
             else if(sourceEvent.getEvent() == SourceEvent.Event.REQUEST_CHANGE_SQUELCH_THRESHOLD)
             {
