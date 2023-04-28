@@ -1,6 +1,6 @@
 /*
  * *****************************************************************************
- * Copyright (C) 2014-2022 Dennis Sheirer
+ * Copyright (C) 2014-2023 Dennis Sheirer
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,12 +34,12 @@ public class AutomaticGainControl
     /* Signal delay line - time delay in seconds */
 	private static final float DELAY_TIME_CONSTANT = 0.015f;
     /* Peak detector window - time delay in seconds */
-    private static final float WINDOW_TIME_CONSTANT = 0.02f;
+    private static final float WINDOW_TIME_CONSTANT = 0.018f;
     /* Attack time constants in seconds */
-//    private static final float ATTACK_RISE_TIME_CONSTANT = 0.002f;
-//    private static final float ATTACK_FALL_TIME_CONSTANT = 0.005f;
-    private static final float ATTACK_RISE_TIME_CONSTANT = 0.2f;
-    private static final float ATTACK_FALL_TIME_CONSTANT = 0.5f;
+    private static final float ATTACK_RISE_TIME_CONSTANT = 0.002f;
+    private static final float ATTACK_FALL_TIME_CONSTANT = 0.005f;
+//    private static final float ATTACK_RISE_TIME_CONSTANT = 0.2f;
+//    private static final float ATTACK_FALL_TIME_CONSTANT = 0.5f;
     private static final float ATTACK_RISE_ALPHA = 1.0f - (float)FastMath.exp(-1.0 / SAMPLE_RATE * ATTACK_RISE_TIME_CONSTANT);
     private static final float ATTACK_FALL_ALPHA = 1.0f - (float)FastMath.exp(-1.0 / SAMPLE_RATE * ATTACK_FALL_TIME_CONSTANT);
     /* AGC decay value in milliseconds (20 to 5000) */
@@ -51,14 +51,14 @@ public class AutomaticGainControl
     /* Hang timer release decay time constant in seconds */
     private static final float RELEASE_TIME_CONSTANT = 0.05f;
     /* Specifies the AGC Knee in dB if AGC is active (nominal range -160 to 0 dB) */
-    private static final float THRESHOLD = -100;
+    private static final float THRESHOLD = -20.0f;
     /* Limit output to about 3db of maximum */
     private static final float AGC_OUT_SCALE = 0.7f;
     /* Keep max input and output the same */
     private static final float MAX_AMPLITUDE = 32767.0f; //1.0;
     private static final float MAX_MANUAL_AMPLITUDE = 32767.0f; //1.0;
     /* Specifies AGC manual gain in dB if AGC is not active ( 0 to 100 dB) */
-    private static final float MANUAL_GAIN = 0.0f;
+    private static final float MANUAL_GAIN = -90.308735f;
     private static final float MANUAL_AGC_GAIN = MAX_MANUAL_AMPLITUDE * (float)FastMath.pow(10.0, MANUAL_GAIN / 20.0);
     /* Specifies dB reduction in output at knee from max output level (0 - 10dB) */
     private static final float SLOPE_FACTOR = 2.0f;
@@ -67,24 +67,28 @@ public class AutomaticGainControl
     private static final float FIXED_GAIN = AGC_OUT_SCALE * (float)FastMath.pow(10.0, KNEE * (GAIN_SLOPE - 1.0));
     /* Constant for calc log() so that a value of 0 magnitude = -8 */
     private static final float MIN_CONSTANT = 3.2767E-4f;
-    private boolean mAGCEnabled = true;
-    private float mPeakMagnitude = -10.0f;
+    private boolean mAGCEnabled = false;
+    private float mPeakMagnitude = -5.0f;
     private float mAttackAverage = 0.0f;
     private float mDecayAverage = 0.0f;
     private FloatCircularBuffer mDelayBuffer = new FloatCircularBuffer((int)(SAMPLE_RATE * DELAY_TIME_CONSTANT));
     private FloatCircularBuffer mMagnitudeBuffer = new FloatCircularBuffer((int)(SAMPLE_RATE * WINDOW_TIME_CONSTANT), mPeakMagnitude);
+    private float mMaxGain = 0f;
+    private float mMinGain = 100000f;
 
     /**
      * Construct an instance
      */
     public AutomaticGainControl()
     {
+        System.out.println("Manual gain: " + MANUAL_AGC_GAIN);
     }
 
     public void reset()
     {
-        mLog.info("Resetting - Peak:" + mPeakMagnitude + " Attack:" + mAttackAverage + " Decay:" + mDecayAverage + " Delay Max:" + mDelayBuffer.max() + " Mag Max:" + mMagnitudeBuffer.max());
-        mPeakMagnitude = -10.0f;
+        mLog.info("Previous - Min Gain: " + mMinGain + " Max Gain: " + mMaxGain);
+        mLog.info("Resetting - Peak:" + mPeakMagnitude + " Attack:" + mAttackAverage + " Decay:" + mDecayAverage + " Mag Max:" + mMagnitudeBuffer.max(mPeakMagnitude));
+        mPeakMagnitude = -5.0f;
         mAttackAverage = -5.0f;
         mDecayAverage = -5.0f;
         mDelayBuffer.reset(0.0f);
@@ -135,7 +139,7 @@ public class AutomaticGainControl
             else if(delayedMagnitude == mPeakMagnitude)
             {
                 /* If delayed magnitude is the current peak, then find a new peak */
-                mPeakMagnitude = mMagnitudeBuffer.max();
+                mPeakMagnitude = mMagnitudeBuffer.max(-5.0f);
             }
 
             /* Exponential decay mode */
@@ -169,7 +173,16 @@ public class AutomaticGainControl
                 gain = AGC_OUT_SCALE * (float)FastMath.pow(10.0, magnitude * (GAIN_SLOPE - 1.0));
             }
 
-            mLog.info("Peak: " + mPeakMagnitude + " Attack: " + mAttackAverage + " Decay: " + mDecayAverage + " Gain: " + gain);
+//            mLog.info("Peak: " + mPeakMagnitude + " Attack: " + mAttackAverage + " Decay: " + mDecayAverage + " Gain: " + gain);
+        }
+
+        if(gain < mMinGain)
+        {
+            mMinGain = gain;
+        }
+        if(gain > mMaxGain)
+        {
+            mMaxGain = gain;
         }
 
         return delayedSample * gain;
@@ -191,5 +204,12 @@ public class AutomaticGainControl
     public boolean isAGCEnabled()
     {
         return mAGCEnabled;
+    }
+
+    public static void main(String[] args)
+    {
+        AutomaticGainControl agc = new AutomaticGainControl();
+
+        System.out.println("Finished.");
     }
 }

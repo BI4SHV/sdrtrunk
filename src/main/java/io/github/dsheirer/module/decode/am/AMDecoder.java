@@ -29,7 +29,7 @@ import io.github.dsheirer.module.decode.analog.SquelchingAnalogDecoder;
  */
 public class AMDecoder extends SquelchingAnalogDecoder
 {
-    private static final float DEMODULATOR_GAIN = 2000.0f;
+    private static final float DEMODULATOR_GAIN = 400.0f; //400 seems about right for a strong local signal
     private static final float SQUELCH_ALPHA_DECAY = 0.0004f;
     private static final float SQUELCH_THRESHOLD_DB = -78.0f;
     private AutomaticGainControl mAGC = new AutomaticGainControl();
