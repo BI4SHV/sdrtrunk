@@ -21,8 +21,12 @@ package io.github.dsheirer.module.decode.am;
 
 import io.github.dsheirer.dsp.am.SquelchingAMDemodulator;
 import io.github.dsheirer.dsp.gain.AutomaticGainControl;
+import io.github.dsheirer.dsp.gain.ObjectiveGainControl;
 import io.github.dsheirer.module.decode.DecoderType;
 import io.github.dsheirer.module.decode.analog.SquelchingAnalogDecoder;
+import io.github.dsheirer.source.wave.RealWaveSource;
+
+import java.io.File;
 
 /**
  * Decoder module with integrated squelching AM demodulator
@@ -68,5 +72,31 @@ public class AMDecoder extends SquelchingAnalogDecoder
     {
         mAGC.reset();
         super.notifyCallStart();
+    }
+
+    public static void main(String[] args)
+    {
+        ObjectiveGainControl agc = new ObjectiveGainControl(1.0f, 4.0f, 0.7f);
+
+        String path = "C:\\Users\\sheirerd\\SDRTrunk\\recordings\\20230430_052528Air_Boston_Center__TO_3.wav";
+        File file = new File(path);
+
+        try
+        {
+            RealWaveSource source = new RealWaveSource(file);
+            source.setListener(floats -> agc.process(floats));
+            source.open();
+
+            while(true)
+            {
+                source.next(256, true);
+            }
+
+        }
+        catch(Exception e)
+        {
+//            mLog.error("Error", e);
+        }
+        System.out.println("Finished.");
     }
 }
